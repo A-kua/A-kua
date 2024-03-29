@@ -24,8 +24,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(site::polite::index));
 
         let blog_scope = web::scope("")
-            // .guard(guard::Host("blog.akua.fan"))
-            // .guard(guard::Host("localhost"))
+            .guard(guard::Host("blog.akua.fan"))
             .route("/", web::get().to(site::blog::index))
             .service(web::scope("article")
                 .service(article))
@@ -38,13 +37,14 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(BlogState {
                 visit_count: Arc::new(AtomicUsize::new(0)),
             }))
-            // .service(guide_scope)
-            // .service(akua_scope)
-            // .service(polite_scope)
+            .service(guide_scope)
+            .service(akua_scope)
+            .service(polite_scope)
             .service(blog_scope)
     })
         .bind(("0.0.0.0", 8080))?
-        // .workers(6)
+        /// Why I select 4 in here? I think it is four core services that are used simultaneously, named blog, css, js, image.
+        .workers(4)
         .keep_alive(None)
         .run()
         .await
