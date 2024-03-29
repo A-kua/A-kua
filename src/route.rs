@@ -22,25 +22,43 @@ async fn image(req: HttpRequest,name: web::Path<(String)>) -> HttpResponse {
         },
         Err(_) => {
             HttpResponse::NotFound()
-                .body("File not found")
+                .body("Image file not found")
         },
     }
 }
 
 #[get("/css/{name}")]
-async fn css(path: web::Path<(String)>) -> HttpResponse {
-    let body = once(ok::<_, Error>(web::Bytes::from_static(b"test")));
+async fn css(req: HttpRequest,name: web::Path<(String)>) -> HttpResponse {
+    let file_path = std::path::PathBuf::from(std::env::var("BLOG_STATIC").unwrap())
+        .as_path()
+        .join("static-css")
+        .join(&name.into_inner());
 
-    HttpResponse::Ok()
-        .content_type("text/css")
-        .streaming(body)
+    match NamedFile::open_async(file_path).await {
+        Ok(file) => {
+            file.into_response(&req)
+        },
+        Err(_) => {
+            HttpResponse::NotFound()
+                .body("Css file not found")
+        },
+    }
 }
 
 #[get("/js/{name}")]
-async fn js(path: web::Path<(String)>) -> HttpResponse {
-    let body = once(ok::<_, Error>(web::Bytes::from_static(b"test")));
+async fn js(req: HttpRequest,name: web::Path<(String)>) -> HttpResponse {
+    let file_path = std::path::PathBuf::from(std::env::var("BLOG_STATIC").unwrap())
+        .as_path()
+        .join("static-js")
+        .join(&name.into_inner());
 
-    HttpResponse::Ok()
-        .content_type("application/javascript")
-        .streaming(body)
+    match NamedFile::open_async(file_path).await {
+        Ok(file) => {
+            file.into_response(&req)
+        },
+        Err(_) => {
+            HttpResponse::NotFound()
+                .body("Javascript file not found")
+        },
+    }
 }
