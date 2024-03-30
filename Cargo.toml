@@ -19,3 +19,4 @@ serde = { version = "1.0.197", features = ["derive"] }
 futures = "0.3.30"
 num_cpus = "1.16.0"
 toml = "0.8.12"
+markdown = "1.0.0-alpha.16"

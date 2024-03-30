@@ -3,6 +3,7 @@ mod route;
 mod sites;
 mod structs;
 
+use std::env::VarError;
 use std::fs;
 use actix_web::{web, App, HttpServer, Responder, FromRequest, guard};
 use std::sync::{Arc};
@@ -12,10 +13,9 @@ use toml::{to_string_pretty, from_str};
 use serde::{Serialize, Deserialize};
 use crate::bean::{BlogState};
 use crate::route::{posts, css, image, js};
-use crate::structs::template::{BlogIndexTemplate, Friend, Post, Project};
+use crate::structs::template::{BlogIndexTemplate, Friend, Post, PostTemplate, Project};
 
-async fn generate_toml() -> String {
-    // 创建示例数据
+async fn generate_index() -> String {
     let blog_index = BlogIndexTemplate {
         title: String::from("Akua's Blog"),
         motto: "Welcome to my blog!".to_string(),
@@ -38,27 +38,55 @@ async fn generate_toml() -> String {
     to_string_pretty(&blog_index).unwrap()
 }
 
+async fn generate_post(markdown_name: String) -> String {
+    let file_path = std::path::PathBuf::from(std::env::var("BLOG_STATIC").unwrap())
+        .as_path()
+        .join("static-post")
+        .join(markdown_name);
+    let markdown_string = fs::read_to_string(file_path).unwrap();
+    let markdown_html: String = markdown::to_html(markdown_string.as_str());
+    let blog_post = PostTemplate {
+        title: String::from("Post 1"),
+        time: "2021-01-01".to_string(),
+        description: "This is description".to_string(),
+        markdown: markdown_html.to_string(),
+    };
+    to_string_pretty(&blog_post).unwrap()
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Number of logical cores is {}", num_cpus::get());
-    // fs::write("blog_index.toml", generate_toml().await).unwrap();
+
+    match std::env::var("BLOG_STATIC") {
+        Ok(BLOG_STATIC) => {
+            println!("BLOG_STATIC is {}", BLOG_STATIC);
+        }
+        Err(_) => {
+            panic!("Pls set BLOG_STATIC")
+        }
+    }
+
+    // fs::write("blog_index.toml", generate_index().await).unwrap();
+    // fs::write("blog_post.toml", generate_post("test.md".to_string()).await).unwrap();
+
     let toml_string_from_file = fs::read_to_string("blog_index.toml").unwrap();
     let deserialized_from_file: BlogIndexTemplate = from_str(&toml_string_from_file).unwrap();
     HttpServer::new(move || {
-        // let guide_scope = web::scope("")
-        //     .guard(guard::Host("127.0.0.1"))
-        //     .route("/", web::get().to(sites::guide::index));
-        //
-        // let akua_scope = web::scope("")
-        //     .guard(guard::Host("akua.fan"))
-        //     .route("/", web::get().to(sites::akua::index));
-        //
-        // let polite_scope = web::scope("")
-        //     .guard(guard::Host("polite.cat"))
-        //     .route("/", web::get().to(sites::polite::index));
+        let guide_scope = web::scope("")
+            .guard(guard::Host("127.0.0.1"))
+            .route("/", web::get().to(sites::guide::index));
+
+        let akua_scope = web::scope("")
+            .guard(guard::Host("akua.fan"))
+            .route("/", web::get().to(sites::akua::index));
+
+        let polite_scope = web::scope("")
+            .guard(guard::Host("polite.cat"))
+            .route("/", web::get().to(sites::polite::index));
 
         let blog_scope = web::scope("")
-            // .guard(guard::Host("blog.akua.fan"))
+            .guard(guard::Host("blog.akua.fan"))
             .route("/", web::get().to(sites::blog::index))
             .service(web::scope("posts")
                 .service(posts))
@@ -75,9 +103,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(BlogState::make(deserialized_from_file.clone())))
             .wrap(cors)
-            // .service(guide_scope)
-            // .service(akua_scope)
-            // .service(polite_scope)
+            .service(guide_scope)
+            .service(akua_scope)
+            .service(polite_scope)
             .service(blog_scope)
     })
         .bind(("0.0.0.0", 8080))?

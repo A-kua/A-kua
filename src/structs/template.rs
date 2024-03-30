@@ -5,6 +5,17 @@ use serde::{Serialize, Deserialize};
 #[derive(Template)]
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
+#[template(path = "blog_post.html")]
+pub struct PostTemplate {
+    pub(crate) title: String,
+    pub(crate) time: String,
+    pub(crate) description: String,
+    pub(crate) markdown: String,
+}
+
+#[derive(Template)]
+#[derive(Clone)]
+#[derive(Serialize, Deserialize)]
 #[template(path = "blog_index.html")]
 pub struct BlogIndexTemplate {
     pub(crate) title: String,

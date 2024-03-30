@@ -26,7 +26,7 @@ impl BlogState {
 }
 
 #[derive(Deserialize)]
+#[derive(Clone)]
 pub(crate) struct Post {
     pub(crate) name: String,
-    pub(crate) section: String,
 }
