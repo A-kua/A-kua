@@ -1,11 +1,11 @@
 use actix_web::{Error, HttpRequest};
 use futures::{future::ok, stream::once};
 use actix_web::{get, HttpResponse, Responder, web};
-use crate::bean::{Article};
+use crate::bean::{Post};
 use actix_files::{Files, NamedFile};
 
 #[get("/{name}/{section}")]
-async fn article(path: web::Path<Article>) -> impl Responder {
+async fn posts(path: web::Path<Post>) -> impl Responder {
     format!("number {}, section {}!", path.name, path.section)
 }
 
