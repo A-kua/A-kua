@@ -5,7 +5,7 @@ mod structs;
 
 use std::env::VarError;
 use std::fs;
-use actix_web::{web, App, HttpServer, Responder, FromRequest, guard};
+use actix_web::{web, App, HttpServer, Responder, FromRequest, guard, HttpResponse};
 use std::sync::{Arc};
 use std::sync::atomic::{AtomicUsize};
 use actix_cors::Cors;
@@ -73,20 +73,7 @@ async fn main() -> std::io::Result<()> {
     let toml_string_from_file = fs::read_to_string("blog_index.toml").unwrap();
     let deserialized_from_file: BlogIndexTemplate = from_str(&toml_string_from_file).unwrap();
     HttpServer::new(move || {
-        let guide_scope = web::scope("")
-            .guard(guard::Host("127.0.0.1"))
-            .route("/", web::get().to(sites::guide::index));
-
-        let akua_scope = web::scope("")
-            .guard(guard::Host("akua.fan"))
-            .route("/", web::get().to(sites::akua::index));
-
-        let polite_scope = web::scope("")
-            .guard(guard::Host("polite.cat"))
-            .route("/", web::get().to(sites::polite::index));
-
         let blog_scope = web::scope("")
-            .guard(guard::Host("blog.akua.fan"))
             .route("/", web::get().to(sites::blog::index))
             .service(web::scope("posts")
                 .service(posts))
@@ -103,9 +90,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(BlogState::make(deserialized_from_file.clone())))
             .wrap(cors)
-            .service(guide_scope)
-            .service(akua_scope)
-            .service(polite_scope)
             .service(blog_scope)
     })
         .bind(("0.0.0.0", 8080))?
