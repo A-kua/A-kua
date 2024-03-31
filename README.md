@@ -2,5 +2,6 @@
 - 👀 I’m interested in Android Framework.
 - 🌱 I’m currently learning NixLang and Rust
 
+- My website is http://blog.akua.fan/
 - I uphold the principles of equality for all and oppose discrimination based on race, ethnicity, and sexual orientation. I strive to treat everyone with kindness, so please feel free to communicate with me without fear.
 
