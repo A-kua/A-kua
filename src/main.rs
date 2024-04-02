@@ -46,9 +46,9 @@ async fn generate_post(markdown_name: String) -> String {
     let markdown_string = fs::read_to_string(file_path).unwrap();
     let markdown_html: String = markdown::to_html(markdown_string.as_str());
     let blog_post = PostTemplate {
-        title: String::from("Post 1"),
-        time: "2021-01-01".to_string(),
-        description: "This is description".to_string(),
+        title: String::from("How LSPatch works"),
+        time: "2024-04-01".to_string(),
+        description: "While the LSPatch is amazing, there's no magic behind the technology. In this post, we will analyze it's source code, understand how it works and find ways to anagist it.".to_string(),
         markdown: markdown_html.to_string(),
     };
     to_string_pretty(&blog_post).unwrap()
@@ -68,7 +68,7 @@ async fn main() -> std::io::Result<()> {
     }
 
     // fs::write("blog_index.toml", generate_index().await).unwrap();
-    // fs::write("blog_post.toml", generate_post("test.md".to_string()).await).unwrap();
+    // fs::write("LSPatch.toml", generate_post("LSPatch.md".to_string()).await).unwrap();
 
     let toml_string_from_file = fs::read_to_string("blog_index.toml").unwrap();
     let deserialized_from_file: BlogIndexTemplate = from_str(&toml_string_from_file).unwrap();
