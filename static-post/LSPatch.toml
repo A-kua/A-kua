@@ -1,0 +1,531 @@
+title = "How LSPatch works"
+time = "2024-04-01"
+description = "While the LSPatch is amazing, there's no magic behind the technology. In this post, we will analyze it's source code, understand how it works and find ways to anagist it."
+markdown = """
+
+<p>What is LSPatch?
+&gt; LSPatch: A non-root Xposed framework extending from LSPosed.</p>
+
+<p>While the LSPatch is amazing, there's no magic behind the technology. In this post, we will analyze it's source code, understand how it works and find ways to anagist it.</p>
+
+<h2>Before we start</h2>
+
+<p>Most developers think that the first line of code executed by an Android app is located in Application.</p>
+
+<p>That's not entirely true. Manifest.xml has a label named &quot;Instrumentation&quot; which is the real class that developer can customize. But even though it's the real entrypoint, no one uses it because of it's heavy responsibility.</p>
+
+<p>For the above reason, Google publishd  <strong>AppComponentFactory</strong>, a class used only to create <em>The Five Components</em>, since Android O (8.0). It's cooresponding label in AndroidManifest is <strong>appcomponentFactory</strong>.</p>
+
+<blockquote>
+<p>The Five Components: Activity; Service; Broadcast; ContentProvider; Application;</p>
+</blockquote>
+
+<h2>Let's go!</h2>
+
+<p>First of all, we should clone it's source code, and make a simple demo.</p>
+
+<blockquote>
+<p>AndroidManifest.xml</p>
+
+<pre><code class="language-xml">&lt;?xml version='1.0' encoding='utf-8'?&gt;
+&lt;manifest
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;com.mycompany.application2&quot;&gt;
+    &lt;application&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+
+<p>That's all, enough.</p>
+</blockquote>
+
+<p>Then use LSPatch to process it. And finally, unpack it.
+<em>ps. Do not worry about wich mode to use, there's no difference.</em></p>
+
+<blockquote>
+<p>processed AndroidManifest.xml</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;com.mycompany.application2&quot;
+    platformBuildVersionCode=&quot;30&quot;
+    platformBuildVersionName=&quot;11&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot;
+    android:compileSdkVersion=&quot;30&quot;
+    android:compileSdkVersionCodename=&quot;11&quot;&gt;
+    &lt;uses-sdk
+        android:minSdkVersion=&quot;28&quot;
+        android:targetSdkVersion=&quot;23&quot; /&gt;
+    &lt;application
+        android:debuggable=&quot;true&quot;
+        android:appComponentFactory=&quot;org.lsposed.lspatch.metaloader.LSPAppComponentFactoryStub&quot;&gt;
+        &lt;meta-data
+            android:name=&quot;lspatch&quot;
+            android:value=&quot;...&quot; /&gt;
+            &lt;!-- I omit this value --&gt;
+    &lt;/application&gt;
+    &lt;uses-permission android:name=&quot;android.permission.QUERY_ALL_PACKAGES&quot; /&gt;
+&lt;/manifest&gt;
+</code></pre>
+</blockquote>
+
+<p>From the processed apk, you will find that LSPatch releaces your origin class of appcomponentFactory to the LSPAppComponentFactoryStub.</p>
+
+<p>Obviously, this is where the magic comes from.</p>
+
+<hr>
+
+<h3>LSPAppComponentFactoryStub</h3>
+
+<p>This class is located in module <mark>meta-loader</mark>.</p>
+
+<pre><code class="language-java">public class LSPAppComponentFactoryStub extends AppComponentFactory {
+
+    private static final String TAG = &quot;LSPatch-MetaLoader&quot;;
+    private static final Map&lt;String, String&gt; archToLib = new HashMap&lt;String, String&gt;(4);
+
+    public static byte[] dex;
+
+    static {
+        try {
+            archToLib.put(&quot;arm&quot;, &quot;armeabi-v7a&quot;);
+            archToLib.put(&quot;arm64&quot;, &quot;arm64-v8a&quot;);
+            archToLib.put(&quot;x86&quot;, &quot;x86&quot;);
+            archToLib.put(&quot;x86_64&quot;, &quot;x86_64&quot;);
+
+            ...
+            String libName = archToLib.get(arch);
+            // fetch device architecture
+
+            boolean useManager = false;
+            String soPath;
+
+            // read config of patch
+            try (var is = cl.getResourceAsStream(Constants.CONFIG_ASSET_PATH);
+                ...
+            }
+
+            if (useManager) {
+                // manager mode
+                Log.i(TAG, &quot;Bootstrap loader from manager&quot;);
+                var ipm = IPackageManager.Stub.asInterface(ServiceManager.getService(&quot;package&quot;));
+                ApplicationInfo manager = ipm.getApplicationInfo(Constants.MANAGER_PACKAGE_NAME, 0, Process.myUid() / 100000);
+                try (var zip = new ZipFile(new File(manager.sourceDir));
+                     // copy assets/lspatch/loader.dex from manager
+                     var is = zip.getInputStream(zip.getEntry(Constants.LOADER_DEX_ASSET_PATH));
+                     var os = new ByteArrayOutputStream()) {
+                    transfer(is, os);
+                    dex = os.toByteArray();
+                }
+                soPath = manager.sourceDir + &quot;!/assets/lspatch/so/&quot; + libName + &quot;/liblspatch.so&quot;;
+            } else {
+                // local mode
+                Log.i(TAG, &quot;Bootstrap loader from embedment&quot;);
+                try (var is = cl.getResourceAsStream(Constants.LOADER_DEX_ASSET_PATH);
+                     // copy assets/lspatch/loader.dex from self
+                     var os = new ByteArrayOutputStream()) {
+                    transfer(is, os);
+                    dex = os.toByteArray();
+                }
+                soPath = cl.getResource(&quot;assets/lspatch/so/&quot; + libName + &quot;/liblspatch.so&quot;).getPath().substring(5);
+            }
+            // After above processing, assets/lspatch/loader.dex is readed into byte[] dex
+            // Then, load lspatch.so
+            System.load(soPath);
+        } catch (Throwable e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+}
+</code></pre>
+
+<p>Summing-ip:
+The first job LSPAppComponentFactoryStub does is read dex, according to patch's config.
+The second job is to call System.load, and load lspatch.so.</p>
+
+<hr>
+
+<h3>lspatch.so</h3>
+
+<p>The source code of lspatch.so is patch_main.cpp, located in module <mark>patch-loader</mark>.</p>
+
+<pre><code class="language-cpp">#include &lt;jni.h&gt;
+
+#include &quot;config_impl.h&quot;
+#include &quot;patch_loader.h&quot;
+
+JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+    JNIEnv* env;
+    if (vm-&gt;GetEnv(reinterpret_cast&lt;void**&gt;(&amp;env), JNI_VERSION_1_6) != JNI_OK) {
+        return JNI_ERR;
+    }
+    lspd::PatchLoader::Init();
+    lspd::ConfigImpl::Init();
+    lspd::PatchLoader::GetInstance()-&gt;Load(env);
+    return JNI_VERSION_1_6;
+}
+</code></pre>
+
+<p>Looks like there are 2 important classes - PatchLoader and ConfigImpl.</p>
+
+<p>ConfigImpl is very simple, so we analyze it first.</p>
+
+<h4>ConfigImpl</h4>
+
+<pre><code class="language-cpp">#pragma once
+
+#include &lt;string&gt;
+#include &quot;config_bridge.h&quot;
+
+namespace lspd {
+
+    class ConfigImpl : public ConfigBridge {
+    public:
+        inline static void Init() {
+            instance_ = std::make_unique&lt;ConfigImpl&gt;();
+        }
+
+        virtual obfuscation_map_t&amp; obfuscation_map() override {
+            return obfuscation_map_;
+        }
+
+        virtual void obfuscation_map(obfuscation_map_t m) override {
+            obfuscation_map_ = std::move(m);
+        }
+
+    private:
+        inline static std::map&lt;std::string, std::string&gt; obfuscation_map_ = {
+                {&quot;de.robv.android.xposed.&quot;, &quot;de.robv.android.xposed.&quot;},
+                { &quot;android.app.AndroidApp&quot;, &quot;android.app.AndroidApp&quot;},
+                { &quot;android.content.res.XRes&quot;, &quot;android.content.res.XRes&quot;},
+                { &quot;android.content.res.XModule&quot;, &quot;android.content.res.XModule&quot;},
+                { &quot;org.lsposed.lspd.core.&quot;, &quot;org.lsposed.lspd.core.&quot;},
+                { &quot;org.lsposed.lspd.nativebridge.&quot;, &quot;org.lsposed.lspd.nativebridge.&quot;},
+                { &quot;org.lsposed.lspd.service.&quot;, &quot;org.lsposed.lspd.service.&quot;},
+        };
+    };
+}
+</code></pre>
+
+<p>The location of config_bridge.h is in LSPosed's module named <mark>core</mark>.</p>
+
+<pre><code class="language-cpp">#pragma once
+
+#include &lt;map&gt;
+
+namespace lspd {
+    using obfuscation_map_t = std::map&lt;std::string, std::string&gt;;
+
+    class ConfigBridge {
+    public:
+        inline static ConfigBridge *GetInstance() {
+            return instance_.get();
+        }
+
+        inline static std::unique_ptr&lt;ConfigBridge&gt; ReleaseInstance() {
+            return std::move(instance_);
+        }
+
+        virtual obfuscation_map_t &amp;obfuscation_map() = 0;
+
+        virtual void obfuscation_map(obfuscation_map_t) = 0;
+
+        virtual ~ConfigBridge() = default;
+
+    protected:
+        static std::unique_ptr&lt;ConfigBridge&gt; instance_;
+    };
+}
+</code></pre>
+
+<p>This class uses the singleton pattern, and maintians a hash map internally.</p>
+
+<p>Very simple.</p>
+
+<h4>PatchLoader</h4>
+
+<p>PatchLoader contains .h and .cpp.</p>
+
+<blockquote>
+<p>PatchLoader.h</p>
+</blockquote>
+
+<pre><code class="language-cpp">
+#include &quot;context.h&quot;
+
+namespace lspd {
+    inline lsplant::InitInfo handler;
+    class PatchLoader : public Context {
+    public:
+        inline static void Init() {
+            instance_ = std::make_unique&lt;PatchLoader&gt;();
+        }
+        inline static PatchLoader* GetInstance() {
+            return static_cast&lt;PatchLoader*&gt;(instance_.get());
+        }
+        void Load(JNIEnv* env);
+    protected:
+        void InitArtHooker(JNIEnv* env, const lsplant::InitInfo&amp; initInfo) override;
+        void InitHooks(JNIEnv* env) override;
+        void LoadDex(JNIEnv* env, PreloadedDex&amp;&amp; dex) override;
+        void SetupEntryClass(JNIEnv* env) override;
+    };
+} // namespace lspd
+</code></pre>
+
+<p>Also, the location of context.h is in LSPosed's module named <mark>core</mark>.</p>
+
+<p>We don't need to know it's details.</p>
+
+<blockquote>
+<p>PatchLoader.cpp</p>
+</blockquote>
+
+<pre><code class="language-cpp">namespace lspd {
+
+    void PatchLoader::LoadDex(JNIEnv* env, Context::PreloadedDex&amp;&amp; dex) {
+        ...
+        auto in_memory_classloader = JNI_FindClass(env, &quot;dalvik/system/InMemoryDexClassLoader&quot;);
+        auto mid_init = JNI_GetMethodID(env, in_memory_classloader, &quot;&lt;init&gt;&quot;,
+                                        &quot;(Ljava/nio/ByteBuffer;Ljava/lang/ClassLoader;)V&quot;);
+        auto byte_buffer_class = JNI_FindClass(env, &quot;java/nio/ByteBuffer&quot;);
+        auto dex_buffer = env-&gt;NewDirectByteBuffer(dex.data(), dex.size());
+        if (auto my_cl = JNI_NewObject(env, in_memory_classloader, mid_init, dex_buffer, stub_classloader)) {
+            inject_class_loader_ = JNI_NewGlobalRef(env, my_cl);
+        }
+        env-&gt;DeleteLocalRef(dex_buffer);
+    }
+
+    void PatchLoader::SetupEntryClass(JNIEnv* env) {
+        if (auto entry_class = FindClassFromLoader(env, GetCurrentClassLoader(),
+                                                   &quot;org.lsposed.lspatch.loader.LSPApplication&quot;)) {
+            entry_class_ = JNI_NewGlobalRef(env, entry_class);
+        }
+    }
+
+    void PatchLoader::Load(JNIEnv* env) {
+        // Located in module core. To avoid dead-lock when modify memory.
+        InitSymbolCache(nullptr);
+        // Config of LSPlant.
+        lsplant::InitInfo initInfo {
+                .inline_hooker = [](auto t, auto r) {
+                    void* bk = nullptr;
+                    return HookFunction(t, r, &amp;bk) == RS_SUCCESS ? bk : nullptr;
+                },
+                .inline_unhooker = [](auto t) {
+                    return UnhookFunction(t) == RT_SUCCESS;
+                },
+                .art_symbol_resolver = [](auto symbol) {
+                    return GetArt()-&gt;getSymbAddress&lt;void*&gt;(symbol);
+                },
+                .art_symbol_prefix_resolver = [](auto symbol) {
+                    return GetArt()-&gt;getSymbPrefixFirstAddress(symbol);
+                },
+        };
+
+        auto stub = JNI_FindClass(env, &quot;org/lsposed/lspatch/metaloader/LSPAppComponentFactoryStub&quot;);
+        auto dex_field = JNI_GetStaticFieldID(env, stub, &quot;dex&quot;, &quot;[B&quot;);
+        // get byte[] dex in LSPAppComponentFactoryStub, and convert it to PreloadedDex
+        // There is one important thing, in the constructor of PreloadedDex, byte[] dex will be moved to anonymous memory alloced by mmap.
+        ScopedLocalRef&lt;jbyteArray&gt; array = JNI_GetStaticObjectField(env, stub, dex_field);
+        auto dex = PreloadedDex {env-&gt;GetByteArrayElements(array.get(), nullptr), static_cast&lt;size_t&gt;(JNI_GetArrayLength(env, array))};
+
+        // Initialize LSPlant's hook
+        InitArtHooker(env, initInfo);
+        // load dex by InMemoryDexClassLoader
+        LoadDex(env, std::move(dex));
+        // do hook
+        InitHooks(env);
+
+        GetArt(true);
+
+        SetupEntryClass(env);
+        // call &quot;void onLoad&quot; in org.lsposed.lspatch.loader.LSPApplication
+        FindAndCall(env, &quot;onLoad&quot;, &quot;()V&quot;);
+    }
+} // namespace lspd
+
+</code></pre>
+
+<p>Note here that LSPatch uses a means to avoid detection.
+LSPatch's dex will be loaded into anonymous memory.</p>
+
+<blockquote>
+<p>PreloadedDex</p>
+</blockquote>
+
+<pre><code class="language-cpp">    Context::PreloadedDex::PreloadedDex(int fd, std::size_t size) {
+        LOGD(&quot;Context::PreloadedDex::PreloadedDex: fd={}, size={}&quot;, fd, size);
+        auto *addr = mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0);
+
+        if (addr != MAP_FAILED) {
+            addr_ = addr;
+            size_ = size;
+        } else {
+            PLOGE(&quot;Read dex&quot;);
+        }
+    }
+
+    Context::PreloadedDex::~PreloadedDex() {
+        if (*this) munmap(addr_, size_);
+    } 
+</code></pre>
+
+<hr>
+
+<h3>LSPApplication</h3>
+
+<p>The source code locates in module <mark>patch-loader</mark>.</p>
+
+<p>In fact, although it's name is Application, it is not <em>Application</em>.</p>
+
+<pre><code class="language-java">public class LSPApplication {
+    private static ActivityThread activityThread;
+    private static LoadedApk stubLoadedApk;
+    private static LoadedApk appLoadedApk;
+
+    private static PatchConfig config;
+
+    public static void onLoad() throws RemoteException, IOException {
+        if (isIsolated()) {
+            return;
+        }
+        activityThread = ActivityThread.currentActivityThread();
+        var context = createLoadedApkWithContext();
+        ILSPApplicationService service;
+        if (config.useManager) {
+            service = new RemoteApplicationService(context);
+        } else {
+            service = new LocalApplicationService(context);
+        }
+
+        disableProfile(context);
+        Startup.initXposed(false, ActivityThread.currentProcessName(), context.getApplicationInfo().dataDir, service);
+        Startup.bootstrapXposed();
+        LSPLoader.initModules(appLoadedApk);
+
+        switchAllClassLoader();
+        SigBypass.doSigBypass(context, config.sigBypassLevel);
+    }
+
+    private static Context createLoadedApkWithContext() {
+        try {
+            var mBoundApplication = XposedHelpers.getObjectField(activityThread, &quot;mBoundApplication&quot;);
+
+            stubLoadedApk = (LoadedApk) XposedHelpers.getObjectField(mBoundApplication, &quot;info&quot;);
+            var appInfo = (ApplicationInfo) XposedHelpers.getObjectField(mBoundApplication, &quot;appInfo&quot;);
+            var compatInfo = (CompatibilityInfo) XposedHelpers.getObjectField(mBoundApplication, &quot;compatInfo&quot;);
+            var baseClassLoader = stubLoadedApk.getClassLoader();
+
+            try (var is = baseClassLoader.getResourceAsStream(CONFIG_ASSET_PATH)) {
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+                config = new Gson().fromJson(streamReader, PatchConfig.class);
+            } catch (IOException e) {
+                Log.e(TAG, &quot;Failed to load config file&quot;);
+                return null;
+            }
+            Log.i(TAG, &quot;Use manager: &quot; + config.useManager);
+            Log.i(TAG, &quot;Signature bypass level: &quot; + config.sigBypassLevel);
+
+            Path originPath = Paths.get(appInfo.dataDir, &quot;cache/lspatch/origin/&quot;);
+            Path cacheApkPath;
+            try (ZipFile sourceFile = new ZipFile(appInfo.sourceDir)) {
+                cacheApkPath = originPath.resolve(sourceFile.getEntry(ORIGINAL_APK_ASSET_PATH).getCrc() + &quot;.apk&quot;);
+            }
+
+            appInfo.sourceDir = cacheApkPath.toString();
+            appInfo.publicSourceDir = cacheApkPath.toString();
+            appInfo.appComponentFactory = config.appComponentFactory;
+
+            if (!Files.exists(cacheApkPath)) {
+                Log.i(TAG, &quot;Extract original apk&quot;);
+                FileUtils.deleteFolderIfExists(originPath);
+                Files.createDirectories(originPath);
+                try (InputStream is = baseClassLoader.getResourceAsStream(ORIGINAL_APK_ASSET_PATH)) {
+                    Files.copy(is, cacheApkPath);
+                }
+            }
+            cacheApkPath.toFile().setWritable(false);
+
+            var mPackages = (Map&lt;?, ?&gt;) XposedHelpers.getObjectField(activityThread, &quot;mPackages&quot;);
+            mPackages.remove(appInfo.packageName);
+            appLoadedApk = activityThread.getPackageInfoNoCheck(appInfo, compatInfo);
+            XposedHelpers.setObjectField(mBoundApplication, &quot;info&quot;, appLoadedApk);
+
+            var activityClientRecordClass = XposedHelpers.findClass(&quot;android.app.ActivityThread$ActivityClientRecord&quot;, ActivityThread.class.getClassLoader());
+            var fixActivityClientRecord = (BiConsumer&lt;Object, Object&gt;) (k, v) -&gt; {
+                if (activityClientRecordClass.isInstance(v)) {
+                    var pkgInfo = XposedHelpers.getObjectField(v, &quot;packageInfo&quot;);
+                    if (pkgInfo == stubLoadedApk) {
+                        Log.d(TAG, &quot;fix loadedapk from ActivityClientRecord&quot;);
+                        XposedHelpers.setObjectField(v, &quot;packageInfo&quot;, appLoadedApk);
+                    }
+                }
+            };
+            var mActivities = (Map&lt;?, ?&gt;) XposedHelpers.getObjectField(activityThread, &quot;mActivities&quot;);
+            mActivities.forEach(fixActivityClientRecord);
+            try {
+                if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S) {
+                    var mLaunchingActivities = (Map&lt;?, ?&gt;) XposedHelpers.getObjectField(activityThread, &quot;mLaunchingActivities&quot;);
+                    mLaunchingActivities.forEach(fixActivityClientRecord);
+                }
+            } catch (Throwable ignored) {
+            }
+            Log.i(TAG, &quot;hooked app initialized: &quot; + appLoadedApk);
+
+            var context = (Context) XposedHelpers.callStaticMethod(Class.forName(&quot;android.app.ContextImpl&quot;), &quot;createAppContext&quot;, activityThread, stubLoadedApk);
+            if (config.appComponentFactory != null) {
+                try {
+                    context.getClassLoader().loadClass(config.appComponentFactory);
+                } catch (ClassNotFoundException e) { // This will happen on some strange shells like 360
+                    Log.w(TAG, &quot;Original AppComponentFactory not found: &quot; + config.appComponentFactory);
+                    appInfo.appComponentFactory = null;
+                }
+            }
+            return context;
+        } catch (Throwable e) {
+            Log.e(TAG, &quot;createLoadedApk&quot;, e);
+            return null;
+        }
+    }
+    private static void switchAllClassLoader() {
+        var fields = LoadedApk.class.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getType() == ClassLoader.class) {
+                var obj = XposedHelpers.getObjectField(appLoadedApk, field.getName());
+                XposedHelpers.setObjectField(stubLoadedApk, field.getName(), obj);
+            }
+        }
+    }
+}
+
+</code></pre>
+
+<p>I don't think this part is hard to understand, it only does six thing.</p>
+
+<ol>
+<li>check for _isolated<em>process</em></li>
+<li>make a instance of <em>LoadedApk</em>, and use it to create a <em>Context</em></li>
+<li>call <em>context.getClassLoader().loadClass(config.appComponentFactory);</em> and  set it to LoadedApk</li>
+<li>disable <em>Profile</em> and call <em>Startup</em> using fake-context.</li>
+<li>loaded Xposed's modules</li>
+<li>replace all <em>classloader</em> in fake-loadedApk to classloader in real-loadedApk</li>
+</ol>
+
+<hr>
+
+<h2>Final summing-up</h2>
+
+<p>All of the above processes run in static block of LSPAppComponentFactoryStub.</p>
+
+<p>Processed app cann't know what happened.</p>
+
+<p>The magic of LSPatch is fully revealed.</p>
+
+<h2>Ways to anagist it</h2>
+
+<p>The most simple method is to add <em>instrumentation</em>.
+In addition, using <em>SVC</em> can avoid LSPatch' hook.
+Fair enough, you can <em>check memory</em> in /proc/self/maps.</p>
+"""
