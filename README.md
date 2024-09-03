@@ -6,6 +6,7 @@
 ### Announcement
 
 - I uphold the principles of equality for all and oppose discrimination based on race, ethnicity, and sexual orientation. I strive to treat everyone with kindness, so please feel free to communicate with me without fear.
+- 🗣 Language: English, Chinese(Simplify).
 
 ### Favorites
 
